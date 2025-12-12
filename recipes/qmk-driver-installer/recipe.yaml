@@ -25,10 +25,8 @@ build:
   skip: "not win"
   
   script: |
-    # Create a dedicated directory for the tools to keep things organized
     mkdir "%PREFIX%\Library\driver_tools"
     
-    # Copy the downloaded installer
     if exist qmk_driver_installer.exe (
       copy qmk_driver_installer.exe "%PREFIX%\Library\driver_tools\"
     ) else (
@@ -36,15 +34,10 @@ build:
       exit 1
     )
 
-    # Copy the driver definition file
     copy qmk_drivers.txt "%PREFIX%\Library\driver_tools\"
     
-    # Create a convenience batch script in the main bin folder
-    # This allows 'install-drivers' to be called from anywhere
     echo @echo off > "%PREFIX%\Library\bin\install-drivers.bat"
     
-    # We use a powershell wrapper inside the bat file to force Admin privileges
-    # This means running 'install-drivers' will pop up the UAC prompt automatically
     echo powershell -Command "Start-Process '%PREFIX%\Library\driver_tools\qmk_driver_installer.exe' -ArgumentList '%PREFIX%\Library\driver_tools\qmk_drivers.txt' -WorkingDirectory '%PREFIX%\Library\driver_tools' -Verb RunAs" >> "%PREFIX%\Library\bin\install-drivers.bat"
 
 requirements:
