@@ -22,7 +22,7 @@ source:
 build:
   number: 0
   # This package is Windows-only
-  skip: '${{ target_platform != "win-64" }}'
+  skip: "not win"
   
   script: |
     # Create a dedicated directory for the tools to keep things organized
