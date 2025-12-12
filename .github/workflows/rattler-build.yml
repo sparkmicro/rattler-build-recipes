@@ -1,0 +1,26 @@
+name: Build and Upload Recipes
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+
+jobs:
+  build:
+    name: Build ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install rattler-build
+        uses: prefix-dev/rattler-build-action@v0.2.20
+        with:
+          upload-to-prefix-dev: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+          api-key: ${{ secrets.RATTLER_TOKEN }}
+          channel: "https://prefix.dev/channels/spark-micro"
+          recipe-dir: "recipes"

@@ -1,0 +1,24 @@
+context:
+  version: "0.11-be49612"
+  # The specific commit or tag from your script
+  download_url: "https://github.com/sparkmicro/dfu-util/releases/download/v0.11-be49612/dfu-util_be49612.zip"
+
+package:
+  name: dfu-util-spark
+  version: ${{ version }}
+
+source:
+  url: ${{ download_url }}
+  # It is good practice to add a sha256 checksum here so builds are reproducible
+  sha256: "9a2961397839a9d5cb7091b60c2322933c27ffee308d26a03adfafa0887f21ba" 
+
+build:
+  number: 0
+  # This makes it a "generic" script package (easiest for repacking binaries)
+  script: |
+    # Create the bin directory in the environment
+    mkdir -p $PREFIX/bin
+    
+    # Copy the binaries from the downloaded zip to the bin directory
+    # Note: Adjust pattern if the zip structure is different
+    cp -r * $PREFIX/bin/

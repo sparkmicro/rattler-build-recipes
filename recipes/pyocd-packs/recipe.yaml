@@ -1,0 +1,20 @@
+package:
+  name: pyocd-packs
+  version: "1.0.0"
+
+source:
+  - url: https://keilpack.azureedge.net/pack/Keil.STM32G4xx_DFP.1.5.0.pack
+    sha256: "5c878bb8b2de2120153b9570e789ea216b9a1a0903dbe1e154ceb1ff0a4d2972"
+  - url: https://keilpack.azureedge.net/pack/Keil.STM32U5xx_DFP.2.1.0.pack
+    sha256: "888c6ee851b33dbfcfa46b60e490794ff86e70a9446538857785c12df8f7cf6e"
+
+build:
+  number: 0
+  noarch: generic
+  script: |
+    # Create the target directory
+    mkdir -p $PREFIX/packs
+    
+    # Move the downloaded packs into the environment
+    # source/ contains the downloaded files
+    cp *.pack $PREFIX/packs/
