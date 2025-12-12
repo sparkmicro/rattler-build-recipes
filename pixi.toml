@@ -1,0 +1,10 @@
+[project]
+name = "rattler-build-recipes"
+version = "0.1.0"
+description = "Rattler-build recipes for Spark Microsystems"
+authors = ["Jean-Francois Chenier <jean-francois.chenier@sparkmicro.com>"]
+channels = ["conda-forge"]
+platforms = ["linux-64", "osx-64", "osx-arm64", "win-64"]
+
+[dependencies]
+rattler-build = ">=0.35.0"

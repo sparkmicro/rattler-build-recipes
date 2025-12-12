@@ -22,16 +22,13 @@ jobs:
         with:
           pixi-version: v0.41.1
 
-      - name: Install rattler-build
-        run: pixi global install rattler-build
-        
       - name: Build recipes
         run: |
-          rattler-build build --recipe-dir recipes --output-dir output
+          pixi run rattler-build build --recipe-dir recipes --output-dir output
 
       - name: Upload to prefix.dev
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         env:
           RATTLER_TOKEN: ${{ secrets.RATTLER_TOKEN }}
         run: |
-          rattler-build upload prefix --channel "https://prefix.dev/channels/spark-micro" --api-key "$RATTLER_TOKEN" output/**/*.conda
+          pixi run rattler-build upload prefix --channel "https://prefix.dev/channels/spark-micro" --api-key "$RATTLER_TOKEN" output/**/*.conda
