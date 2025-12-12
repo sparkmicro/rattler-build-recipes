@@ -1,5 +1,5 @@
 context:
-  version: "0.11-be49612"
+  version: "0.11_be49612"
   # The specific commit or tag from your script
   download_url: "https://github.com/sparkmicro/dfu-util/releases/download/v0.11-be49612/dfu-util_be49612.zip"
 

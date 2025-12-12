@@ -1,6 +1,6 @@
 context:
   name: gcc-arm-none-eabi
-  version: "10.3-2021.10"
+  version: "10.3_2021.10"
   
 package:
   name: ${{ name }}
@@ -9,28 +9,68 @@ package:
 source:
   # Linux (x86_64)
   - if: linux and x86_64
-    url: https://developer.arm.com/-/media/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2
-    sha256: 97dbb4f019ad1650b732faffcc881689cedc14e2b7ee863d390e0a41ef16c9a3
+    then:
+      url: https://developer.arm.com/-/media/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2
+      sha256: 97dbb4f019ad1650b732faffcc881689cedc14e2b7ee863d390e0a41ef16c9a3
 
   # Linux (AArch64)
   - if: linux and aarch64
-    url: https://developer.arm.com/-/media/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-aarch64-linux.tar.bz2
-    md5: 3fe3d8bb693bd0a6e4615b6569443d0d
+    then:
+      url: https://developer.arm.com/-/media/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-aarch64-linux.tar.bz2
+      md5: 3fe3d8bb693bd0a6e4615b6569443d0d
 
   # macOS (x86_64)
   - if: osx
-    url: https://developer.arm.com/-/media/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-mac.tar.bz2
-    sha256: fb613dacb25149f140f73fe9ff6c380bb43328e6bf813473986e9127e2bc283b
+    then:
+      url: https://developer.arm.com/-/media/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-mac.tar.bz2
+      sha256: fb613dacb25149f140f73fe9ff6c380bb43328e6bf813473986e9127e2bc283b
 
   # Windows
   - if: win
-    url: https://developer.arm.com/-/media/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-win32.zip
-    md5: 2bc8f0c4c4659f8259c8176223eeafc1
+    then:
+      url: https://developer.arm.com/-/media/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-win32.zip
+      md5: 2bc8f0c4c4659f8259c8176223eeafc1
 
 build:
   number: 0
-  binary_relocation: false 
-  detect_binary_files_with_prefix: false
+  script: |
+    # Enter directory (wildcard handles both old and new naming conventions)
+    cd gcc-arm-none-eabi-* || cd arm-gnu-toolchain-*
+
+    # Create target directories
+    mkdir -p $PREFIX/bin
+    mkdir -p $PREFIX/lib
+    mkdir -p $PREFIX/share
+    mkdir -p $PREFIX/arm-none-eabi
+    
+    # Copy files
+    cp -r bin/* $PREFIX/bin/
+    cp -r lib/* $PREFIX/lib/
+    cp -r share/* $PREFIX/share/
+    cp -r arm-none-eabi/* $PREFIX/arm-none-eabi/
+    
+    # libexec is not always present in 10.3, but we check just in case
+    if [ -d "libexec" ]; then
+      mkdir -p $PREFIX/libexec
+      cp -r libexec/* $PREFIX/libexec/
+    fi
+
+    # --- Symlink Patches (Linux Only) ---
+    if [ "$(uname)" = "Linux" ]; then
+        echo "Applying symlink patches for Linux..."
+        
+        # 1. Library Compatibility Fix
+        # Create symlinks so binaries looking for .so.5 find the .so.6 provided by the environment
+        cd $PREFIX/lib
+        ln -sf libtinfo.so.6 libtinfo.so.5
+        ln -sf libncurses.so.6 libncurses.so.5
+        cd - > /dev/null
+
+        # 2. GDB Symlink Fix (Pigweed override)
+        # Force the bin/arm-none-eabi-gdb to point to the one inside the arm-none-eabi folder
+        # if that is required by your specific tooling setup.
+        ln -sf $PREFIX/arm-none-eabi/bin/arm-none-eabi-gdb $PREFIX/bin/arm-none-eabi-gdb
+    fi
 
 requirements:
   build:
@@ -38,42 +78,3 @@ requirements:
   run:
     # Required for the symlink fix to work (provides libtinfo.so.6)
     - ncurses # [linux]
-
-script: |
-  # Enter directory (wildcard handles both old and new naming conventions)
-  cd gcc-arm-none-eabi-* || cd arm-gnu-toolchain-*
-
-  # Create target directories
-  mkdir -p $PREFIX/bin
-  mkdir -p $PREFIX/lib
-  mkdir -p $PREFIX/share
-  mkdir -p $PREFIX/arm-none-eabi
-  
-  # Copy files
-  cp -r bin/* $PREFIX/bin/
-  cp -r lib/* $PREFIX/lib/
-  cp -r share/* $PREFIX/share/
-  cp -r arm-none-eabi/* $PREFIX/arm-none-eabi/
-  
-  # libexec is not always present in 10.3, but we check just in case
-  if [ -d "libexec" ]; then
-    mkdir -p $PREFIX/libexec
-    cp -r libexec/* $PREFIX/libexec/
-  fi
-
-  # --- Symlink Patches (Linux Only) ---
-  if [ "$(uname)" = "Linux" ]; then
-      echo "Applying symlink patches for Linux..."
-      
-      # 1. Library Compatibility Fix
-      # Create symlinks so binaries looking for .so.5 find the .so.6 provided by the environment
-      cd $PREFIX/lib
-      ln -sf libtinfo.so.6 libtinfo.so.5
-      ln -sf libncurses.so.6 libncurses.so.5
-      cd - > /dev/null
-
-      # 2. GDB Symlink Fix (Pigweed override)
-      # Force the bin/arm-none-eabi-gdb to point to the one inside the arm-none-eabi folder
-      # if that is required by your specific tooling setup.
-      ln -sf $PREFIX/arm-none-eabi/bin/arm-none-eabi-gdb $PREFIX/bin/arm-none-eabi-gdb
-  fi
