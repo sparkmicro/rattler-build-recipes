@@ -33,51 +33,62 @@ source:
 
 build:
   number: 0
-  script: |
-    # Enter directory if it exists (handles various packaging conventions)
-    # If not found, we assume the files are in the current directory (which seems to be the case for xPack on Linux)
-    if ls -d gcc-arm-none-eabi-* 1> /dev/null 2>&1; then
-      cd gcc-arm-none-eabi-*
-    elif ls -d arm-gnu-toolchain-* 1> /dev/null 2>&1; then
-      cd arm-gnu-toolchain-*
-    elif ls -d xpack-arm-none-eabi-gcc-* 1> /dev/null 2>&1; then
-      cd xpack-arm-none-eabi-gcc-*
-    fi
+  script:
+    - if: unix
+      then: |
+        # Enter directory if it exists
+        if ls -d gcc-arm-none-eabi-* 1> /dev/null 2>&1; then
+          cd gcc-arm-none-eabi-*
+        elif ls -d arm-gnu-toolchain-* 1> /dev/null 2>&1; then
+          cd arm-gnu-toolchain-*
+        elif ls -d xpack-arm-none-eabi-gcc-* 1> /dev/null 2>&1; then
+          cd xpack-arm-none-eabi-gcc-*
+        fi
 
-    # Create target directories
-    mkdir -p $PREFIX/bin
-    mkdir -p $PREFIX/lib
-    mkdir -p $PREFIX/share
-    mkdir -p $PREFIX/arm-none-eabi
-    
-    # Copy files
-    cp -r bin/* $PREFIX/bin/
-    cp -r lib/* $PREFIX/lib/
-    cp -r share/* $PREFIX/share/
-    cp -r arm-none-eabi/* $PREFIX/arm-none-eabi/
-    
-    # libexec is not always present in 10.3, but we check just in case
-    if [ -d "libexec" ]; then
-      mkdir -p $PREFIX/libexec
-      cp -r libexec/* $PREFIX/libexec/
-    fi
-
-    # --- Symlink Patches (Linux Only) ---
-    if [ "$(uname)" = "Linux" ]; then
-        echo "Applying symlink patches for Linux..."
+        mkdir -p $PREFIX/bin
+        mkdir -p $PREFIX/lib
+        mkdir -p $PREFIX/share
+        mkdir -p $PREFIX/arm-none-eabi
         
-        # 1. Library Compatibility Fix
-        # Create symlinks so binaries looking for .so.5 find the .so.6 provided by the environment
-        cd $PREFIX/lib
-        ln -sf libtinfo.so.6 libtinfo.so.5
-        ln -sf libncurses.so.6 libncurses.so.5
-        cd - > /dev/null
+        cp -r bin/* $PREFIX/bin/
+        cp -r lib/* $PREFIX/lib/
+        cp -r share/* $PREFIX/share/
+        cp -r arm-none-eabi/* $PREFIX/arm-none-eabi/
+        
+        if [ -d "libexec" ]; then
+          mkdir -p $PREFIX/libexec
+          cp -r libexec/* $PREFIX/libexec/
+        fi
 
-        # 2. GDB Symlink Fix (Pigweed override)
-        # Force the bin/arm-none-eabi-gdb to point to the one inside the arm-none-eabi folder
-        # if that is required by your specific tooling setup.
-        ln -sf $PREFIX/arm-none-eabi/bin/arm-none-eabi-gdb $PREFIX/bin/arm-none-eabi-gdb
-    fi
+        if [ "$(uname)" = "Linux" ]; then
+            cd $PREFIX/lib
+            ln -sf libtinfo.so.6 libtinfo.so.5
+            ln -sf libncurses.so.6 libncurses.so.5
+            cd - > /dev/null
+            ln -sf $PREFIX/arm-none-eabi/bin/arm-none-eabi-gdb $PREFIX/bin/arm-none-eabi-gdb
+        fi
+
+    - if: win
+      then: |
+        REM Find the directory (xPack extracts to a subdir) and enter it
+        for /d %%D in (xpack-arm-none-eabi-gcc-*) do cd %%D
+        for /d %%D in (gcc-arm-none-eabi-*) do cd %%D
+        for /d %%D in (arm-gnu-toolchain-*) do cd %%D
+
+        if not exist "%PREFIX%\\bin" mkdir "%PREFIX%\\bin"
+        if not exist "%PREFIX%\\lib" mkdir "%PREFIX%\\lib"
+        if not exist "%PREFIX%\\share" mkdir "%PREFIX%\\share"
+        if not exist "%PREFIX%\\arm-none-eabi" mkdir "%PREFIX%\\arm-none-eabi"
+
+        xcopy /s /y /i bin "%PREFIX%\\bin"
+        xcopy /s /y /i lib "%PREFIX%\\lib"
+        xcopy /s /y /i share "%PREFIX%\\share"
+        xcopy /s /y /i arm-none-eabi "%PREFIX%\\arm-none-eabi"
+        
+        if exist "libexec" (
+          if not exist "%PREFIX%\\libexec" mkdir "%PREFIX%\\libexec"
+          xcopy /s /y /i libexec "%PREFIX%\\libexec"
+        )
 
 requirements:
   build:

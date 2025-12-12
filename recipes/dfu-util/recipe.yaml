@@ -14,11 +14,12 @@ source:
 
 build:
   number: 0
-  # This makes it a "generic" script package (easiest for repacking binaries)
-  script: |
-    # Create the bin directory in the environment
-    mkdir -p $PREFIX/bin
-    
-    # Copy the binaries from the downloaded zip to the bin directory
-    # Note: Adjust pattern if the zip structure is different
-    cp -r * $PREFIX/bin/
+  script:
+    - if: unix
+      then: |
+        mkdir -p $PREFIX/bin
+        cp -r * $PREFIX/bin/
+    - if: win
+      then: |
+        mkdir %PREFIX%\\bin
+        copy * %PREFIX%\\bin\\

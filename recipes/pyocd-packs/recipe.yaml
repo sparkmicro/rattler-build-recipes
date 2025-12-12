@@ -11,10 +11,12 @@ source:
 build:
   number: 0
   noarch: generic
-  script: |
-    # Create the target directory
-    mkdir -p $PREFIX/packs
-    
-    # Move the downloaded packs into the environment
-    # source/ contains the downloaded files
-    cp *.pack $PREFIX/packs/
+  script:
+    - if: unix
+      then: |
+        mkdir -p $PREFIX/packs
+        cp *.pack $PREFIX/packs/
+    - if: win
+      then: |
+        if not exist "%PREFIX%\\packs" mkdir "%PREFIX%\\packs"
+        copy *.pack "%PREFIX%\\packs\\"
