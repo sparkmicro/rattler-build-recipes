@@ -1,0 +1,54 @@
+context:
+  name: qmk-driver-installer
+  version: "1.0.0"
+  # This is the official QMK driver installer release
+  installer_url: "https://github.com/qmk/qmk_driver_installer/releases/download/v1.01/qmk_driver_installer.exe"
+  # sha256 of the exe to ensure integrity (optional but recommended)
+  sha256: "ccd78a40e3db74a189f42e3eab93463ef6c214c4f928b586992d70863b094431"
+
+package:
+  name: ${{ name }}
+  version: ${{ version }}
+
+source:
+  # 1. Download the installer executable
+  - url: ${{ installer_url }}
+    sha256: ${{ sha256 }}
+  
+  # 2. Include the local driver definition file
+  # This expects 'qmk_drivers.txt' to be in the same folder as this recipe
+  - path: qmk_drivers.txt
+
+build:
+  number: 0
+  # This package is Windows-only
+  skip: true  # [not win]
+  
+  script: |
+    # Create a dedicated directory for the tools to keep things organized
+    mkdir "%PREFIX%\Library\driver_tools"
+    
+    # Copy the downloaded installer
+    if exist qmk_driver_installer.exe (
+      copy qmk_driver_installer.exe "%PREFIX%\Library\driver_tools\"
+    ) else (
+      echo "Error: Installer executable not found in source"
+      exit 1
+    )
+
+    # Copy the driver definition file
+    copy qmk_drivers.txt "%PREFIX%\Library\driver_tools\"
+    
+    # Create a convenience batch script in the main bin folder
+    # This allows 'install-drivers' to be called from anywhere
+    echo @echo off > "%PREFIX%\Library\bin\install-drivers.bat"
+    
+    # We use a powershell wrapper inside the bat file to force Admin privileges
+    # This means running 'install-drivers' will pop up the UAC prompt automatically
+    echo powershell -Command "Start-Process '%PREFIX%\Library\driver_tools\qmk_driver_installer.exe' -ArgumentList '%PREFIX%\Library\driver_tools\qmk_drivers.txt' -WorkingDirectory '%PREFIX%\Library\driver_tools' -Verb RunAs" >> "%PREFIX%\Library\bin\install-drivers.bat"
+
+requirements:
+  build:
+    # No compiler needed
+  run:
+    # No runtime dependencies
