@@ -23,11 +23,13 @@ jobs:
           pixi-version: v0.41.1
 
       - name: Build recipes
+        shell: bash
         run: |
           pixi run rattler-build build --recipe-dir recipes --output-dir output
 
       - name: Upload to prefix.dev
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        shell: bash
         env:
           RATTLER_TOKEN: ${{ secrets.RATTLER_TOKEN }}
         run: |
