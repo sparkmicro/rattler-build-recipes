@@ -18,7 +18,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Install rattler-build
-        uses: prefix-dev/rattler-build-action@v0.2.20
+        uses: prefix-dev/rattler-build-action@v0.2.34
         with:
           upload-to-prefix-dev: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
           api-key: ${{ secrets.RATTLER_TOKEN }}
