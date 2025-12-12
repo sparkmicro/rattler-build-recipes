@@ -33,6 +33,7 @@ source:
 
 build:
   number: 0
+  string: "0_${{ target_platform }}"
   script:
     - if: unix
       then: |
