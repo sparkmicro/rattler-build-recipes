@@ -36,6 +36,7 @@ build:
 
     copy qmk_drivers.txt "%PREFIX%\Library\driver_tools\"
     
+    if not exist "%PREFIX%\Library\bin" mkdir "%PREFIX%\Library\bin"
     echo @echo off > "%PREFIX%\Library\bin\install-drivers.bat"
     
     echo powershell -Command "Start-Process '%PREFIX%\Library\driver_tools\qmk_driver_installer.exe' -ArgumentList '%PREFIX%\Library\driver_tools\qmk_drivers.txt' -WorkingDirectory '%PREFIX%\Library\driver_tools' -Verb RunAs" >> "%PREFIX%\Library\bin\install-drivers.bat"
