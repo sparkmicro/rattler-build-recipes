@@ -19,8 +19,14 @@ jobs:
 
       - name: Install rattler-build
         uses: prefix-dev/rattler-build-action@v0.2.34
-        with:
-          upload-to-prefix-dev: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
-          api-key: ${{ secrets.RATTLER_TOKEN }}
-          channel: "https://prefix.dev/channels/spark-micro"
-          recipe-dir: "recipes"
+        
+      - name: Build recipes
+        run: |
+          rattler-build build --recipe-dir recipes --output-dir output
+
+      - name: Upload to prefix.dev
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        env:
+          RATTLER_TOKEN: ${{ secrets.RATTLER_TOKEN }}
+        run: |
+          rattler-build upload prefix --channel "https://prefix.dev/channels/spark-micro" --api-key "$RATTLER_TOKEN" output/**/*.conda
