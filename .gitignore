@@ -1,0 +1,10 @@
+# Rattler build output
+output/
+*.conda
+*.tar.bz2
+
+# Logs and temporary files
+*.log
+*.txt
+repodata.json
+__pycache__/
