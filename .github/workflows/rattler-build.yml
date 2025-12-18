@@ -34,4 +34,4 @@ jobs:
           RATTLER_TOKEN: ${{ secrets.RATTLER_TOKEN }}
         run: |
           ls -R output
-          find output -name "*.conda" -print0 | xargs -0 -I {} bash -c 'pixi run rattler-build upload prefix --channel "spark-micro" --api-key "$RATTLER_TOKEN" --force "{}"'
+          find output -name "*.conda" -print0 | xargs -0 -I {} python3 scripts/upload_package.py "{}" "spark-micro" "$RATTLER_TOKEN"
