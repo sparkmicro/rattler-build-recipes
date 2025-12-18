@@ -40,12 +40,17 @@ def main():
     
     print(f"I: Processing {filepath} (subdir: {subdir})")
 
-    # 1. Fetch repodata
+    # Fetch repodata
     repodata_url = f"https://prefix.dev/{channel}/{subdir}/repodata.json"
     print(f"I: Fetching repodata from {repodata_url}")
     
     try:
-        with urllib.request.urlopen(repodata_url) as response:
+        req = urllib.request.Request(repodata_url)
+        # Use simple Bearer auth. Note: prefix.dev might expect just the token or Bearer
+        # Based on curl test, it used "Bearer <token>"
+        req.add_header("Authorization", f"Bearer {token}")
+        
+        with urllib.request.urlopen(req) as response:
             repodata = json.loads(response.read().decode())
     except HTTPError as e:
         print(f"W: Failed to fetch repodata (HTTP {e.code}). Assuming new package.")
