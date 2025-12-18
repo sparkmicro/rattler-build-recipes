@@ -96,4 +96,6 @@ requirements:
     - make  # [unix]
   run:
     # Required for the symlink fix to work (provides libtinfo.so.6)
-    - ncurses # [linux]
+    - if: linux
+      then:
+        - ncurses
