@@ -29,9 +29,14 @@ def main():
     filepath = sys.argv[1]
     channel = sys.argv[2]
     token = sys.argv[3]
+    current_os = sys.argv[4] if len(sys.argv) > 4 else "Linux"
     
     filename = os.path.basename(filepath)
     subdir = get_subdir(filepath)
+    
+    if subdir == "noarch" and current_os != "Linux":
+        print(f"I: Skipping noarch package {filename} on {current_os} to avoid race condition.")
+        return
     
     print(f"I: Processing {filepath} (subdir: {subdir})")
 

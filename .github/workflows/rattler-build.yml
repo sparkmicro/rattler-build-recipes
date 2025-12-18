@@ -34,4 +34,4 @@ jobs:
           RATTLER_TOKEN: ${{ secrets.RATTLER_TOKEN }}
         run: |
           ls -R output
-          find output -name "*.conda" -print0 | xargs -0 -I {} python3 scripts/upload_package.py "{}" "sparkmicro-sdk" "$RATTLER_TOKEN"
+          find output -name "*.conda" -print0 | xargs -0 -I {} python3 scripts/upload_package.py "{}" "sparkmicro-sdk" "$RATTLER_TOKEN" "${{ runner.os }}"
