@@ -1,6 +1,6 @@
 context:
   name: gcc-arm-none-eabi
-  version: "10.3_2021.10"
+  version: "10.3.2021.10"
   
 package:
   name: ${{ name }}

@@ -1,0 +1,33 @@
+From 406e280ed948b103a8ba8554ff2635805020052a Mon Sep 17 00:00:00 2001
+From: Luis Pacheco <luis-manuel.cutler-pacheco@sparkmicro.com>
+Date: Tue, 3 Oct 2023 11:39:26 -0400
+Subject: [PATCH] Add patch to allow importing proto files based on
+ --proto-globs arg
+
+---
+ pw_protobuf_compiler/py/pw_protobuf_compiler/python_protos.py | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/pw_protobuf_compiler/py/pw_protobuf_compiler/python_protos.py b/pw_protobuf_compiler/py/pw_protobuf_compiler/python_protos.py
+index 415611a2c..aedffadb7 100644
+--- a/.micromamba/envs/spark/lib/python3.10/site-packages/pw_protobuf_compiler/python_protos.py
++++ b/.micromamba/envs/spark/lib/python3.10/site-packages/pw_protobuf_compiler/python_protos.py
+@@ -21,6 +21,7 @@ from pathlib import Path
+ import subprocess
+ import shlex
+ import tempfile
++import sys
+ from types import ModuleType
+ from typing import (
+     Dict,
+@@ -146,6 +147,7 @@ def compile_and_import(
+         yield from import_modules(output_dir)
+     else:
+         with tempfile.TemporaryDirectory(prefix='compiled_protos_') as tempdir:
++            sys.path.append(tempdir) # Needed to use imported proto files
+             compile_protos(tempdir, proto_files, includes)
+             yield from import_modules(tempdir)
+
+--
+2.42.0
+

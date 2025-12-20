@@ -97,9 +97,16 @@ def main():
             cmd.insert(5, "--force")
             
         print(f"I: Running: {' '.join(cmd).replace(token, '***')}")
-        result = subprocess.run(cmd)
-        if result.returncode != 0:
-            sys.exit(result.returncode)
+        try:
+            result = subprocess.run(cmd, capture_output=True, text=True)
+            print("STDOUT:", result.stdout)
+            print("STDERR:", result.stderr)
+            if result.returncode != 0:
+                print(f"E: Upload failed with return code {result.returncode}")
+                sys.exit(result.returncode)
+        except Exception as e:
+            print(f"E: Failed to execute upload command: {e}")
+            sys.exit(1)
     
 if __name__ == "__main__":
     main()

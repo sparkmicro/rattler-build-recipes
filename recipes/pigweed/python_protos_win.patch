@@ -1,0 +1,18 @@
+--- ./.micromamba/envs/spark/Lib/site-packages/pw_protobuf_compiler/python_protos.py	2024-01-04 16:49:17.001317800 -0500
++++ ./.micromamba/envs/spark/Lib/site-packages/pw_protobuf_compiler/python_protos.py	2024-01-04 16:49:08.137694700 -0500
+@@ -21,6 +21,7 @@
+ import subprocess
+ import shlex
+ import tempfile
++import sys
+ from types import ModuleType
+ from typing import (
+     Dict,
+@@ -146,6 +147,7 @@
+         yield from import_modules(output_dir)
+     else:
+         with tempfile.TemporaryDirectory(prefix='compiled_protos_') as tempdir:
++            sys.path.append(tempdir) # Needed to use imported proto files
+             compile_protos(tempdir, proto_files, includes)
+             yield from import_modules(tempdir)
+
