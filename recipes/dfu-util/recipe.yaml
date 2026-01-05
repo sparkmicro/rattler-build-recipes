@@ -15,11 +15,11 @@ source:
 build:
   number: 0
   script:
-    - if: unix
+    - if: linux
       then: |
         mkdir -p $PREFIX/bin
-        cp -r * $PREFIX/bin/
+        cp -r linux-amd64/* $PREFIX/bin/
     - if: win
       then: |
         mkdir %PREFIX%\\bin
-        copy * %PREFIX%\\bin\\
+        copy win64\\* %PREFIX%\\bin\\
