@@ -32,8 +32,8 @@ source:
       sha256: 169744f784fb04ae10c60bc6a2cd69cff93cff0bf5657e9333776036f347f9c4
 
 build:
-  number: 1
-  string: "1_${{ target_platform }}"
+  number: 2
+  string: "2_${{ target_platform }}"
   script:
     - if: unix
       then: |

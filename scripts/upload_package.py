@@ -99,6 +99,16 @@ def main():
         print(f"I: Running: {' '.join(cmd).replace(token, '***')}")
         try:
             result = subprocess.run(cmd, capture_output=True, text=True)
+            
+            # Check for specific failure case: "The package does not exist" on forced upload
+            if result.returncode != 0 and force_upload and "The package does not exist" in result.stderr:
+                print("W: Forced upload failed because package seems missing (ghost package). Retrying without --force.")
+                if "--force" in cmd:
+                    cmd.remove("--force")
+                
+                print(f"I: Retrying: {' '.join(cmd).replace(token, '***')}")
+                result = subprocess.run(cmd, capture_output=True, text=True)
+
             print("STDOUT:", result.stdout)
             print("STDERR:", result.stderr)
             if result.returncode != 0:
