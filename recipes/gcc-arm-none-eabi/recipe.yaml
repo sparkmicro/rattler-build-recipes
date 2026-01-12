@@ -32,8 +32,8 @@ source:
       sha256: 169744f784fb04ae10c60bc6a2cd69cff93cff0bf5657e9333776036f347f9c4
 
 build:
-  number: 0
-  string: "0_${{ target_platform }}"
+  number: 1
+  string: "1_${{ target_platform }}"
   script:
     - if: unix
       then: |
@@ -66,7 +66,6 @@ build:
             ln -sf libtinfo.so.6 libtinfo.so.5
             ln -sf libncurses.so.6 libncurses.so.5
             cd - > /dev/null
-            ln -sf $PREFIX/arm-none-eabi/bin/arm-none-eabi-gdb $PREFIX/bin/arm-none-eabi-gdb
         fi
 
     - if: win
