@@ -6,6 +6,15 @@ import subprocess
 import urllib.request
 from urllib.error import HTTPError
 
+
+class AuthRemovingRedirectHandler(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        new_req = super().redirect_request(req, fp, code, msg, headers, newurl)
+        if new_req and req.host != new_req.host:
+            if new_req.has_header("Authorization"):
+                new_req.remove_header("Authorization")
+        return new_req
+
 def calculate_sha256(filepath):
     sha256_hash = hashlib.sha256()
     with open(filepath, "rb") as f:
@@ -21,15 +30,30 @@ def get_subdir(filepath):
         return parts[-2]
     return "linux-64" # fallback, should not happen in CI structure
 
+
+def extract_package_info(filename):
+    """Extract name, version, and build from conda filename."""
+    # Format: name-version-build.conda or name-version-build.tar.bz2
+    parts = filename.rsplit('-', 2)
+    if len(parts) >= 3:
+        name = parts[0]
+        version = parts[1]
+        build = parts[2].replace('.conda', '').replace('.tar.bz2', '')
+        return name, version, build
+    return None, None, None
+
 def main():
     if len(sys.argv) < 4:
-        print("Usage: python upload_package.py <filepath> <channel> <token>")
+        print(
+            "Usage: python upload_package.py <filepath> <channel> <token> [os] [--skip-hash-check]")
         sys.exit(1)
 
     filepath = sys.argv[1]
     channel = sys.argv[2]
     token = sys.argv[3]
-    current_os = sys.argv[4] if len(sys.argv) > 4 else "Linux"
+    current_os = sys.argv[4] if len(
+        sys.argv) > 4 and not sys.argv[4].startswith("--") else "Linux"
+    skip_hash_check = "--skip-hash-check" in sys.argv
     
     filename = os.path.basename(filepath)
     subdir = get_subdir(filepath)
@@ -49,8 +73,10 @@ def main():
         # Use simple Bearer auth. Note: prefix.dev might expect just the token or Bearer
         # Based on curl test, it used "Bearer <token>"
         req.add_header("Authorization", f"Bearer {token}")
+        req.add_header("User-Agent", "sparkmicro-rattler-build-upload/1.0")
         
-        with urllib.request.urlopen(req) as response:
+        opener = urllib.request.build_opener(AuthRemovingRedirectHandler)
+        with opener.open(req) as response:
             repodata = json.loads(response.read().decode())
     except HTTPError as e:
         print(f"W: Failed to fetch repodata (HTTP {e.code}). Assuming new package.")
@@ -67,20 +93,21 @@ def main():
     force_upload = False
     
     if remote_package:
-        print(f"I: Package {filename} exists on channel.")
-        remote_sha = remote_package.get("sha256")
-        local_sha = calculate_sha256(filepath)
+        local_name, local_version, local_build = extract_package_info(filename)
+        print(
+            f"I: Package {local_name} v{local_version} (build {local_build}) exists on channel.")
+
+        # Compare build strings to detect recipe changes
+        # Build string is deterministic from recipe inputs, so if it matches, recipe is identical
+        remote_build = remote_package.get("build")
         
-        print(f"I: Local SHA: {local_sha}")
-        print(f"I: Remote SHA: {remote_sha}")
-        
-        if local_sha == remote_sha:
-            print("I: content matches. Skipping upload.")
+        if local_build == remote_build:
+            print(f"I: Build string matches ({local_build}). Recipe unchanged. Skipping upload.")
             return
         else:
-            print("I: Content differs. Forcing upload.")
+            print(f"I: Build string differs (local: {local_build}, remote: {remote_build}). Recipe changed. Uploading.")
             should_upload = True
-            force_upload = True
+            force_upload = False
     else:
         print(f"I: Package {filename} not found on channel. Uploading.")
         should_upload = True
