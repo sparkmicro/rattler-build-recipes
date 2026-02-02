@@ -1,4 +1,4 @@
-[project]
+[workspace]
 name = "rattler-build-recipes"
 version = "0.1.0"
 description = "Rattler-build recipes for Spark Microsystems"

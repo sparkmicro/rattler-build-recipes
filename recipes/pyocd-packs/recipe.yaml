@@ -3,13 +3,16 @@ package:
   version: "1.0.0"
 
 source:
-  - url: https://keilpack.azureedge.net/pack/Keil.STM32G4xx_DFP.1.5.0.pack
-    sha256: "5c878bb8b2de2120153b9570e789ea216b9a1a0903dbe1e154ceb1ff0a4d2972"
-  - url: https://keilpack.azureedge.net/pack/Keil.STM32U5xx_DFP.2.1.0.pack
-    sha256: "888c6ee851b33dbfcfa46b60e490794ff86e70a9446538857785c12df8f7cf6e"
+  - url: https://keilpack.azureedge.net/pack/Keil.STM32G4xx_DFP.2.2.0.pack
+    sha256: "092a8700e79d65fd0d7ffe50e6140ce71e3162cecc0cbcf14db5714a086fcc00"
+  - url: https://keilpack.azureedge.net/pack/Keil.STM32U5xx_DFP.3.2.0.pack
+    sha256: "e320687fe534f2fe6902e9bcdee981315abea26c4ca547142af9b9439e958be6"
+  - url: https://mcuxpresso.nxp.com/cmsis_pack/repo/NXP.LPC55S28_DFP.25.12.00.pack
+    sha256: "bd043dc6900b515a4b57f086a84ce40af969e1b365c5414d1db32e1b611d5e3a"
+  
 
 build:
-  number: 0
+  number: 1
   noarch: generic
   script:
     - if: unix
