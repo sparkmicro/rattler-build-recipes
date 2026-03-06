@@ -13,7 +13,7 @@ source:
 
 
 build:
-  number: 2
+  number: 3
   noarch: generic
   script:
     - if: unix
@@ -22,12 +22,14 @@ build:
         cp *.pack $PREFIX/packs/
         mkdir -p $PREFIX/etc/conda/activate.d
         cp activate.sh $PREFIX/etc/conda/activate.d/pyocd-packs-activate.sh
+        cp activate.bat $PREFIX/etc/conda/activate.d/pyocd-packs-activate.bat
         cp update_pyocd.py $PREFIX/etc/conda/activate.d/update_pyocd.py
     - if: win
       then: |
         if not exist "%PREFIX%\\packs" mkdir "%PREFIX%\\packs"
         copy *.pack "%PREFIX%\\packs\\"
         if not exist "%PREFIX%\\etc\\conda\\activate.d" mkdir "%PREFIX%\\etc\\conda\\activate.d"
+        copy activate.sh "%PREFIX%\\etc\\conda\\activate.d\\pyocd-packs-activate.sh"
         copy activate.bat "%PREFIX%\\etc\\conda\\activate.d\\pyocd-packs-activate.bat"
         copy update_pyocd.py "%PREFIX%\\etc\\conda\\activate.d\\update_pyocd.py"
 
