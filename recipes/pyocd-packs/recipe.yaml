@@ -1,8 +1,10 @@
 package:
   name: pyocd-packs
-  version: "1.1.0"
+  version: "1.2.0"
 
 source:
+  - url: https://keilpack.azureedge.net/pack/Keil.STM32G0xx_DFP.1.5.0.pack
+    sha256: "10bc5d4e049804d67246115001a3e3fad3aee40bc844e1dce3fbfbaafcb7c1d5"
   - url: https://keilpack.azureedge.net/pack/Keil.STM32G4xx_DFP.2.2.0.pack
     sha256: "092a8700e79d65fd0d7ffe50e6140ce71e3162cecc0cbcf14db5714a086fcc00"
   - url: https://keilpack.azureedge.net/pack/Keil.STM32U5xx_DFP.3.2.0.pack
@@ -13,7 +15,7 @@ source:
 
 
 build:
-  number: 3
+  number: 0
   noarch: generic
   script:
     - if: unix
